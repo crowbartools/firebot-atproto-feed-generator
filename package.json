@@ -1,7 +1,7 @@
 {
-  "name": "firebot-bluesky-feed-generator",
+  "name": "firebot-atproto-feed-generator",
   "version": "1.0.0",
-  "description": "A atproto feed generator for Firebot posts, based on the starter kit",
+  "description": "An atproto (bluesky) feed generator for Firebot posts, based on the starter kit",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
