@@ -81,7 +81,7 @@ export class FeedGenerator {
           }
         })
         .catch((err) => {
-          console.error('Error deleting old posts', err)
+          console.warn('Error deleting old posts', err)
         });
     });
 
