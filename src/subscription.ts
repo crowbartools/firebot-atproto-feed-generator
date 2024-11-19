@@ -14,7 +14,7 @@ export class FirehoseSubscription extends FirehoseSubscriptionBase {
 
     const firebotPosts = ops.posts.creates
       .filter((create) => {
-        return create.author === FIREBOT_ACCOUNT_DID &&
+        return create.author === FIREBOT_ACCOUNT_DID ||
           create.record.text.toLowerCase().includes('firebot')
       });
 
