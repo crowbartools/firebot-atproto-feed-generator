@@ -1,0 +1,24 @@
+name: Deploy Bot
+
+# Only runs after PRs have been merged into master
+on:
+    workflow_dispatch:
+    pull_request:
+        types: [closed]
+        branches:
+            - main
+
+jobs:
+    deploy:
+        name: Deploy Bot
+        runs-on: 'ubuntu-latest'
+        if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+        steps:
+            - name: SSH Remote Commands
+              uses: appleboy/ssh-action@v1.2.0
+              with:
+                  host: ${{ secrets.HOST }}
+                  username: ${{ secrets.USERNAME }}
+                  password: ${{ secrets.PASSWORD }}
+                  port: ${{ secrets.PORT }}
+                  script: cd /srv/firebot-atproto-feed-generator/ && git reset --hard origin/main && git pull && npm install && npm run build
