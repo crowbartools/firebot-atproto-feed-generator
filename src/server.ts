@@ -70,10 +70,10 @@ export class FeedGenerator {
 
     const everyDayScheduleExpression = '0 0 * * *';
     const job = new CronJob(everyDayScheduleExpression, () => {
-      // Delete posts older than 7 days
+      // Delete posts older than 30 days
       this.db
         .deleteFrom("post")
-        .where("indexedAt", "<", new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString())
+        .where("indexedAt", "<", new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString())
         .execute()
         .then((deletedResults) => {
           if (deletedResults.length > 0) {
