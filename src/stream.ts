@@ -9,12 +9,17 @@ const jetstream = new Jetstream({
 });
 
 jetstream.onCreate('app.bsky.feed.post', async (event) => {
-  const isFirebotAccount = event.did === config.firebotAccountDid;
-  const mentionsFirebot = event.commit.record.text
+  const fromFirebotAccount = event.did === config.firebotAccountDid;
+  const taggedFirebotAccount = event.commit.record.facets?.some(
+    (f) =>
+      f.features?.[0]?.$type === 'app.bsky.richtext.facet#mention' &&
+      f.features?.[0]?.did === config.firebotAccountDid,
+  );
+  const includesFirebotInText = event.commit.record.text
     .toLowerCase()
     .includes('firebot');
 
-  if (!isFirebotAccount && !mentionsFirebot) {
+  if (!fromFirebotAccount && !taggedFirebotAccount && !includesFirebotInText) {
     return;
   }
 
