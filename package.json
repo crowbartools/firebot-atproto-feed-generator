@@ -1,36 +1,38 @@
 {
   "name": "firebot-atproto-feed-generator",
   "version": "1.0.0",
-  "description": "An atproto (bluesky) feed generator for Firebot posts, based on the starter kit",
+  "description": "An atproto (bluesky) feed generator for Firebot posts",
   "main": "index.js",
   "license": "MIT",
+  "type": "module",
+  "repository": "github:crowbartools/firebot-atproto-feed-generator",
   "scripts": {
     "publishFeed": "ts-node scripts/publishFeedGen.ts",
     "unpublishFeed": "ts-node scripts/unpublishFeedGen.ts",
-    "start": "ts-node src/index.ts",
+    "start": "tsx src/index.ts",
     "build": "tsc"
   },
   "dependencies": {
-    "@atproto/api": "^0.6.20",
-    "@atproto/identity": "^0.2.1",
-    "@atproto/lexicon": "^0.2.2",
-    "@atproto/repo": "^0.3.2",
-    "@atproto/syntax": "^0.1.2",
-    "@atproto/xrpc-server": "^0.6.0",
-    "better-sqlite3": "^11.3.0",
+    "@atproto/api": "^0.13.18",
+    "@atproto/identity": "^0.4.3",
+    "@atproto/lexicon": "^0.4.3",
+    "@atproto/syntax": "^0.3.1",
+    "@atproto/xrpc-server": "^0.7.3",
+    "@skyware/jetstream": "^0.2.0",
+    "better-sqlite3": "^11.5.0",
     "cron": "^3.2.1",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2",
+    "dotenv": "^16.4.5",
+    "fastify": "^5.1.0",
     "kysely": "^0.27.4",
-    "multiformats": "^9.9.0"
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.11",
-    "@types/express": "^4.17.17",
     "@types/node": "^20.1.2",
+    "@types/ws": "^8.5.13",
     "inquirer": "^12.0.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.0.4"
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   },
   "engines": {
     "node": ">= 18",

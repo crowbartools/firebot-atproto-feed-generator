@@ -1,4 +1,8 @@
-name: Deploy
+name: Deployment
+
+concurrency:
+  group: production
+  cancel-in-progress: true
 
 # Only runs after PRs have been merged into main
 on:
@@ -7,12 +11,13 @@ on:
         types: [closed]
         branches:
             - main
-
+        
 jobs:
-    deploy:
-        name: Deploy To Server
-        runs-on: 'ubuntu-latest'
+    deployment:
+        name: Deploy
         if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+        runs-on: 'ubuntu-latest'
+        environment: production
         steps:
             - name: SSH Remote Commands
               uses: appleboy/ssh-action@v1.2.0
