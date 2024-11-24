@@ -36,8 +36,11 @@ export async function removePostsOlderThan(date: string) {
       .deleteFrom('post')
       .where('indexedAt', '<', date)
       .execute();
-    if (deletedResults.length > 0) {
-      console.log(`Deleted ${deletedResults.length} old posts`);
+    const deletedPostsCount = deletedResults
+      .map((result) => result.numDeletedRows)
+      .reduce((a, b) => a + b, 0 as unknown as bigint);
+    if (deletedPostsCount > 0) {
+      console.log(`Deleted ${deletedPostsCount} old posts`);
     }
   } catch (err) {
     console.warn('Error deleting old posts', err);
