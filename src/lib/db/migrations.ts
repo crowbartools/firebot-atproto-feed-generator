@@ -24,8 +24,8 @@ migrations['001'] = {
       .execute();
   },
   async down(db: Kysely<unknown>) {
-    await db.schema.dropTable('post').execute();
-    await db.schema.dropTable('sub_state').execute();
+    await db.schema.dropTable('post').ifExists().execute();
+    await db.schema.dropTable('sub_state').ifExists().execute();
   },
 };
 
@@ -33,13 +33,7 @@ migrations['001'] = {
 // we are using jetstream instead of the firehose
 migrations['002'] = {
   async up(db: Kysely<unknown>) {
-    await db.schema.dropTable('sub_state').execute();
+    await db.schema.dropTable('sub_state').ifExists().execute();
   },
-  async down(db: Kysely<unknown>) {
-    await db.schema
-      .createTable('sub_state')
-      .addColumn('service', 'varchar', (col) => col.primaryKey())
-      .addColumn('cursor', 'integer', (col) => col.notNull())
-      .execute();
-  },
+  async down() {},
 };
