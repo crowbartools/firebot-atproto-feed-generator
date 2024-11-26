@@ -19,9 +19,9 @@ jetstream.onCreate('app.bsky.feed.post', async (event) => {
       f.features?.[0]?.$type === 'app.bsky.richtext.facet#mention' &&
       f.features?.[0]?.did === config.firebotAccountDid,
   );
-  const includesFirebotInText = event.commit.record.text
-    .toLowerCase()
-    .includes('firebot');
+  const includesFirebotInText = event.commit?.record?.text
+    ?.toLowerCase()
+    ?.includes('firebot');
 
   if (fromFirebotAccount || taggedFirebotAccount || includesFirebotInText) {
     await addPost({
