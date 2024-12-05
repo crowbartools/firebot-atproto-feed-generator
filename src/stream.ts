@@ -23,21 +23,35 @@ jetstream.onCreate('app.bsky.feed.post', async (event) => {
     ?.toLowerCase()
     ?.includes('firebot');
 
-  if (fromFirebotAccount || taggedFirebotAccount || includesFirebotInText) {
+  const includeFirebotInTags = event.commit?.record?.tags?.some((t) =>
+    t?.toLowerCase().includes('firebot'),
+  );
+
+  const includesFirebotInImgAltText =
+    event.commit?.record?.embed?.$type === 'app.bsky.embed.images' &&
+    event.commit?.record?.embed?.images?.some((i) =>
+      i.alt?.toLowerCase().includes('firebot'),
+    );
+
+  const quotesFirebotPost =
+    (event.commit?.record?.embed?.$type === 'app.bsky.embed.record' &&
+      parseAtUri(event.commit?.record?.embed?.record?.uri ?? '').did ===
+        config.firebotAccountDid) ||
+    (event.commit?.record?.embed?.$type === 'app.bsky.embed.recordWithMedia' &&
+      parseAtUri(event.commit?.record?.embed?.record?.record?.uri ?? '').did ===
+        config.firebotAccountDid);
+
+  if (
+    fromFirebotAccount ||
+    taggedFirebotAccount ||
+    includesFirebotInText ||
+    includeFirebotInTags ||
+    quotesFirebotPost ||
+    includesFirebotInImgAltText
+  ) {
     await addPost({
       uri: getAtUri(event.did, event.commit.rkey),
       cid: event.commit.cid,
-      indexedAt: new Date().toISOString(),
-    });
-  }
-});
-
-jetstream.onCreate('app.bsky.feed.like', async (event) => {
-  const fromFirebotAccount = event.did === config.firebotAccountDid;
-  if (fromFirebotAccount) {
-    await addPost({
-      uri: event.commit.record.subject.uri,
-      cid: event.commit.record.subject.cid,
       indexedAt: new Date().toISOString(),
     });
   }
@@ -56,6 +70,11 @@ jetstream.onCreate('app.bsky.feed.repost', async (event) => {
 
 function getAtUri(did: string, rkey: string) {
   return `at://${did}/app.bsky.feed.post/${rkey}`;
+}
+
+function parseAtUri(uri: string) {
+  const [did, collection, rkey] = uri.replace('at://', '').split('/');
+  return { did, collection, rkey };
 }
 
 jetstream.start();
