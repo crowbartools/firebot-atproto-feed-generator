@@ -2,7 +2,9 @@ import Fastify from 'fastify';
 import config from './config.js';
 import { getFirebotPostsFeed } from './lib/feed.js';
 import { AtUri } from '@atproto/syntax';
-import { getAllPosts } from './lib/db/index.js';
+import { getAllPosts, postInFeed, removePost } from './lib/db/index.js';
+import { AtpAgent } from '@atproto/api';
+import { getPostAtUri } from './lib/util.js';
 
 const server = Fastify({
   logger: true,
@@ -89,6 +91,66 @@ server.route({
     });
   },
 });
+
+// remove post from feed
+if (!!config.apiToken?.length) {
+  server.delete('/post', {}, async (req, res) => {
+    const { postUrl, token } = req.query as {
+      postUrl?: string;
+      token?: string;
+    };
+
+    if (token !== config.apiToken) {
+      res.code(403).send({ error: 'Invalid token' });
+      return;
+    }
+
+    if (typeof postUrl !== 'string') {
+      res.code(400).send({ error: 'Invalid post URL' });
+      return;
+    }
+
+    // regex to extract the user handle and post rkey from the URL
+    const regex = /https:\/\/bsky\.app\/profile\/([^/]+)\/post\/([^/]+)/;
+    const match = postUrl.match(regex);
+    if (!match) {
+      res.code(400).send({ error: 'Invalid post URL' });
+      return;
+    }
+
+    const handle = match[1] as string;
+    const postRkey = match[2] as string;
+
+    const agent = new AtpAgent({
+      service: 'https://bsky.social',
+    });
+
+    let did: string | undefined;
+    try {
+      const response = await agent.resolveHandle({
+        handle,
+      });
+      did = response.data.did;
+    } catch (error) {
+      res.code(400).send({ error: 'Invalid handle' });
+      return;
+    }
+
+    const postUri = getPostAtUri(did, postRkey);
+
+    if (!(await postInFeed(postUri))) {
+      res.code(404).send({ error: 'Post not found' });
+      return;
+    }
+
+    await removePost(postUri);
+
+    res.send({
+      success: true,
+    });
+  });
+}
+
 
 const port = config.port;
 server.listen({ port, host: '::' }).then(() => {

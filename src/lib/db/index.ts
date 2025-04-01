@@ -66,6 +66,15 @@ export async function getAllPosts() {
   return await db.selectFrom('post').selectAll().execute();
 }
 
+export async function postInFeed(uri: string) {
+  const post = await db
+    .selectFrom('post')
+    .selectAll()
+    .where('uri', '=', uri)
+    .executeTakeFirst();
+  return !!post;
+}
+
 const migrateToLatest = async (db: Kysely<DatabaseSchema>) => {
   const migrator = new Migrator({ db, provider: migrationProvider });
   const { error } = await migrator.migrateToLatest();

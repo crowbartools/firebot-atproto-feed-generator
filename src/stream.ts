@@ -2,6 +2,7 @@ import { Jetstream } from '@skyware/jetstream';
 import WebSocket from 'ws';
 import config from './config.js';
 import { addPost } from './lib/db/index.js';
+import { getPostAtUri } from './lib/util.js';
 
 const jetstream = new Jetstream({
   ws: WebSocket,
@@ -19,19 +20,32 @@ jetstream.onCreate('app.bsky.feed.post', async (event) => {
       f.features?.[0]?.$type === 'app.bsky.richtext.facet#mention' &&
       f.features?.[0]?.did === config.firebotAccountDid,
   );
-  const includesFirebotInText = event.commit?.record?.text
-    ?.toLowerCase()
-    ?.includes('firebot');
 
-  const includeFirebotInTags = event.commit?.record?.tags?.some((t) =>
-    t?.toLowerCase().includes('firebot'),
+  const textToSearch: string[] = [];
+
+  if (event.commit?.record?.text?.length) {
+    textToSearch.push(event.commit.record.text.toLowerCase());
+  }
+
+  textToSearch.push(
+    ...(event.commit?.record?.tags
+      ?.map((t) => t?.toLowerCase())
+      .filter((t) => !!t.length) ?? []),
   );
 
-  const includesFirebotInImgAltText =
-    event.commit?.record?.embed?.$type === 'app.bsky.embed.images' &&
-    event.commit?.record?.embed?.images?.some((i) =>
-      i.alt?.toLowerCase().includes('firebot'),
-    );
+  textToSearch.push(
+    ...(event.commit?.record?.embed?.$type === 'app.bsky.embed.images'
+      ? event.commit.record.embed.images
+          ?.map((i) => i.alt?.toLowerCase())
+          .filter((i) => !!i.length) ?? []
+      : []),
+  );
+
+  const includesFirebotInText = textToSearch.some(
+    (t) =>
+      t.includes('firebot') &&
+      !config.blacklistedWords.some((w) => t.includes(w)),
+  );
 
   const quotesFirebotPost =
     (event.commit?.record?.embed?.$type === 'app.bsky.embed.record' &&
@@ -44,13 +58,11 @@ jetstream.onCreate('app.bsky.feed.post', async (event) => {
   if (
     fromFirebotAccount ||
     taggedFirebotAccount ||
-    includesFirebotInText ||
-    includeFirebotInTags ||
     quotesFirebotPost ||
-    includesFirebotInImgAltText
+    includesFirebotInText
   ) {
     await addPost({
-      uri: getAtUri(event.did, event.commit.rkey),
+      uri: getPostAtUri(event.did, event.commit.rkey),
       cid: event.commit.cid,
       indexedAt: new Date().toISOString(),
     });
@@ -67,10 +79,6 @@ jetstream.onCreate('app.bsky.feed.repost', async (event) => {
     });
   }
 });
-
-function getAtUri(did: string, rkey: string) {
-  return `at://${did}/app.bsky.feed.post/${rkey}`;
-}
 
 function parseAtUri(uri: string) {
   const [did, collection, rkey] = uri.replace('at://', '').split('/');
