@@ -15,7 +15,7 @@ server.route({
   handler: async (_, res) => {
     res.send({
       '@context': ['https://www.w3.org/ns/did/v1'],
-      id: config.publisherDid,
+      id: config.serviceDid,
       service: [
         {
           id: '#bsky_fg',
