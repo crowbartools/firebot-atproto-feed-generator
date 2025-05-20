@@ -19,5 +19,10 @@ export default {
     maybeStr(process.env.FEEDGEN_SERVICE_DID) ?? `did:web:${hostname}`,
   firebotAccountDid: 'did:plc:gnk67eteayfs2qx76xvecu6f',
   apiToken: maybeStr(process.env.API_TOKEN),
-  blacklistedWords: ['fireboth', 'pantsonfirebot', 'hellfirebot'],
+  blacklistedWords: [
+    'fireboth',
+    'pantsonfirebot',
+    'hellfirebot',
+    'transformer',
+  ],
 };
