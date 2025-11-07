@@ -13,18 +13,18 @@
     "build": "tsc --skipLibCheck"
   },
   "dependencies": {
-    "@atproto/api": "^0.13.18",
-    "@atproto/identity": "^0.4.3",
-    "@atproto/lexicon": "^0.4.3",
-    "@atproto/syntax": "^0.3.1",
-    "@atproto/xrpc-server": "^0.7.3",
-    "@skyware/jetstream": "^0.2.0",
+    "@atproto/api": "^0.18.0",
+    "@atproto/identity": "^0.4.9",
+    "@atproto/lexicon": "^0.5.1",
+    "@atproto/syntax": "^0.4.1",
+    "@atproto/xrpc-server": "^0.9.5",
+    "@skyware/jetstream": "^0.2.5",
     "better-sqlite3": "^11.5.0",
     "cron": "^3.2.1",
     "dotenv": "^16.4.5",
     "fastify": "^5.1.0",
     "kysely": "^0.27.4",
-    "ws": "^8.18.0"
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.11",
