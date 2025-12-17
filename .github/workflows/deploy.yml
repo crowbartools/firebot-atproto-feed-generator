@@ -27,4 +27,4 @@ jobs:
                   username: ${{ secrets.USERNAME }}
                   password: ${{ secrets.PASSWORD }}
                   port: ${{ secrets.PORT }}
-                  script: cd /srv/firebot-atproto-feed-generator/ && git reset --hard origin/main && git pull && npm install && npm run build
+                  script: cd /srv/firebot-atproto-feed-generator/ && git reset --hard origin/main && git pull && npm install && npm run build && pm2 restart all
