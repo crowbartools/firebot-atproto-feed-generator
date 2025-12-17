@@ -12,20 +12,28 @@ const db = new Kysely<DatabaseSchema>({
 
 export async function addPost(post: Post) {
   console.log('Adding post: ', JSON.stringify(post));
-  await db
-    .insertInto('post')
-    .values(post)
-    .onConflict((oc) => oc.doNothing())
-    .execute();
+  try {
+    await db
+      .insertInto('post')
+      .values(post)
+      .onConflict((oc) => oc.doNothing())
+      .execute();
+  } catch (err) {
+    console.error('Error adding post: ', err);
+  }
 }
 
 export async function removePost(uri: string) {
-  const deleteResults = await db
-    .deleteFrom('post')
-    .where('uri', '=', uri)
-    .execute();
-  if (deleteResults.some((result) => result.numDeletedRows > 0)) {
-    console.log(`Deleted post: ${uri}`);
+  try {
+    const deleteResults = await db
+      .deleteFrom('post')
+      .where('uri', '=', uri)
+      .execute();
+    if (deleteResults.some((result) => result.numDeletedRows > 0)) {
+      console.log(`Deleted post: ${uri}`);
+    }
+  } catch (err) {
+    console.error('Error deleting post: ', err);
   }
 }
 
@@ -43,36 +51,51 @@ export async function removePostsOlderThan(date: string) {
       console.log(`Deleted ${deletedPostsCount} old posts`);
     }
   } catch (err) {
-    console.warn('Error deleting old posts', err);
+    console.error('Error deleting old posts', err);
   }
 }
 
 export async function getPosts(limit: number, indexedAt?: string) {
-  let builder = db
-    .selectFrom('post')
-    .selectAll()
-    .orderBy('indexedAt', 'desc')
-    .orderBy('cid', 'desc')
-    .limit(limit);
-
-  if (indexedAt) {
-    builder = builder.where('post.indexedAt', '<', indexedAt);
+  try {
+    let builder = db
+      .selectFrom('post')
+      .selectAll()
+      .orderBy('indexedAt', 'desc')
+      .orderBy('cid', 'desc')
+      .limit(limit);
+  
+    if (indexedAt) {
+      builder = builder.where('post.indexedAt', '<', indexedAt);
+    }
+  
+    return await builder.execute();
+  } catch (err) {
+    console.error('Error getting posts: ', err);
+    return [];
   }
-
-  return await builder.execute();
 }
 
 export async function getAllPosts() {
-  return await db.selectFrom('post').selectAll().execute();
+  try {
+    return await db.selectFrom('post').selectAll().execute();
+  } catch (err) {
+    console.error('Error getting all posts: ', err);
+    return [];
+  }
 }
 
 export async function postInFeed(uri: string) {
-  const post = await db
-    .selectFrom('post')
-    .selectAll()
-    .where('uri', '=', uri)
-    .executeTakeFirst();
-  return !!post;
+  try {
+    const post = await db
+      .selectFrom('post')
+      .selectAll()
+      .where('uri', '=', uri)
+      .executeTakeFirst();
+    return !!post;
+  } catch (err) {
+    console.error('Error checking post in feed: ', err);
+    return false;
+  }
 }
 
 const migrateToLatest = async (db: Kysely<DatabaseSchema>) => {
